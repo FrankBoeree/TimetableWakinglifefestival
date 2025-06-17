@@ -153,6 +153,18 @@ export default function TimetableView() {
     )
   }
 
+  // Show fallback if no data
+  if (!timetable || timetable.length === 0) {
+    return (
+      <div className="p-4">
+        <h1 className="text-3xl font-bold mb-6">Timetable</h1>
+        <div className="text-center py-12 text-gray-400">
+          <p>Geen timetable data beschikbaar.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-4">
       <h1 className="text-3xl font-bold mb-6">Timetable</h1>
@@ -191,7 +203,7 @@ export default function TimetableView() {
       {/* Horizontale Timetable */}
       <div className="relative">
         <div className="overflow-x-auto" ref={scrollRef} style={{ scrollBehavior: "smooth" }}>
-          <div className="flex min-w-max gap-16">
+          <div className="flex min-w-[1800px] gap-16">
             {days.map((day) => {
               const dayArtists = filteredTimetable.filter((a) => a.day === day.id)
               if (dayArtists.length === 0) return null
@@ -225,13 +237,8 @@ export default function TimetableView() {
                       return (
                         <div key={stage.id} className="space-y-2">
                           {/* Stage naam */}
-                          <div className="sticky left-0 z-10 w-32 flex-shrink-0">
-                            <div
-                              className="text-sm font-semibold text-white p-2 rounded"
-                              style={{ backgroundColor: stage.color }}
-                            >
-                              {stage.name}
-                            </div>
+                          <div className="text-sm font-semibold text-white p-2 rounded" style={{ backgroundColor: stage.color }}>
+                            {stage.name}
                           </div>
                           {/* Artiesten voor deze stage */}
                           <div className="relative" style={{ height: "60px" }}>
