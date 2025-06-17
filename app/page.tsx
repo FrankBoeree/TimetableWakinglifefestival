@@ -126,7 +126,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className={activeView === "timetable" ? "h-[calc(100vh-120px)]" : "pb-20"}>
+      <main className={activeView === "timetable" ? "h-[calc(100vh-120px)]" : "pb-24"}>
         {activeView === "timetable" ? (
           <TimetableView />
         ) : (
@@ -136,7 +136,7 @@ export default function Home() {
 
       {/* Bottom Navigation - altijd zichtbaar */}
       <div className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-sm border-t border-gray-800">
-        <div className="flex justify-center items-center py-2 px-4">
+        <div className="flex justify-center items-center py-4 px-4">
           <div className="flex gap-2">
             <Button
               variant={activeView === "timetable" ? "default" : "secondary"}
