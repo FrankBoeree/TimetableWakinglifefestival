@@ -72,7 +72,7 @@ function getCurrentTimePosition() {
   const now = new Date();
   
   // Voor testen: voeg 2 dagen toe
-  now.setDate(now.getDate() + 2);
+  // now.setDate(now.getDate() + 2);
   
   const currentDay = now.getDay(); // 0 = zondag, 1 = maandag, etc.
   const currentHour = now.getHours();
