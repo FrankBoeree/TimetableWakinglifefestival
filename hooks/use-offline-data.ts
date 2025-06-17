@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { offlineStorage, OfflineData } from '@/lib/offline-storage'
 import { timetable } from '@/data/timetable'
-import { artistDetails } from '@/data/artist-details'
 
 interface UseOfflineDataReturn {
   data: OfflineData | null
@@ -32,10 +31,9 @@ export function useOfflineData(): UseOfflineDataReturn {
       }
 
       // If no data in IndexedDB or IndexedDB failed, use static imports
-      if (!offlineData || !offlineData.timetable.length || !offlineData.artistDetails.length) {
+      if (!offlineData || !offlineData.timetable.length) {
         offlineData = {
           timetable,
-          artistDetails,
           favorites: offlineData?.favorites || [],
           lastSync: Date.now(),
           version: '1.0.0'
@@ -44,7 +42,6 @@ export function useOfflineData(): UseOfflineDataReturn {
         // Try to save to IndexedDB (but don't fail if it doesn't work)
         try {
           await offlineStorage.saveData('timetable', timetable)
-          await offlineStorage.saveData('artistDetails', artistDetails)
         } catch (saveError) {
           console.warn('Failed to save to IndexedDB:', saveError)
         }
@@ -58,7 +55,6 @@ export function useOfflineData(): UseOfflineDataReturn {
       // Always provide fallback data
       setData({
         timetable,
-        artistDetails,
         favorites: [],
         lastSync: Date.now(),
         version: '1.0.0'

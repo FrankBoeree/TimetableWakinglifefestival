@@ -100,12 +100,6 @@ export function OfflineStatus() {
               </Badge>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span>Artiest details:</span>
-              <Badge variant={data?.artistDetails.length ? "default" : "secondary"}>
-                {data?.artistDetails.length || 0} artiesten
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between text-sm">
               <span>Favorieten:</span>
               <Badge variant={data?.favorites.length ? "default" : "secondary"}>
                 {data?.favorites.length || 0} favorieten

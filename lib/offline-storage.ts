@@ -1,10 +1,10 @@
 // Offline storage utility using IndexedDB for better performance
 export interface OfflineData {
   timetable: any[]
-  artistDetails: any[]
   favorites: string[]
   lastSync: number
   version: string
+  // artistDetails: any[] // legacy, niet meer gebruikt
 }
 
 class OfflineStorage {
@@ -62,15 +62,13 @@ class OfflineStorage {
   }
 
   async getAllData(): Promise<OfflineData> {
-    const [timetable, artistDetails, favorites] = await Promise.all([
+    const [timetable, favorites] = await Promise.all([
       this.getData('timetable'),
-      this.getData('artistDetails'),
       this.getData('favorites')
     ])
 
     return {
       timetable: timetable || [],
-      artistDetails: artistDetails || [],
       favorites: favorites || [],
       lastSync: Date.now(),
       version: '1.0.0'
@@ -133,11 +131,9 @@ export async function initializeOfflineCapabilities(): Promise<void> {
   if (typeof window !== 'undefined') {
     // Import data modules
     const { timetable } = await import('@/data/timetable')
-    const { artistDetails } = await import('@/data/artist-details')
 
     // Save to IndexedDB
     await offlineStorage.saveData('timetable', timetable)
-    await offlineStorage.saveData('artistDetails', artistDetails)
 
     // Load favorites from localStorage and save to IndexedDB
     const storedFavorites = localStorage.getItem('festival-favorites')
