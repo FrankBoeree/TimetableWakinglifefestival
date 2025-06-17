@@ -67,12 +67,122 @@ function getFestivalTotalMinutes(timetable: Artist[]) {
   return Math.ceil(max / 60) * 60;
 }
 
+// Helper: bereken huidige tijd positie in de tijdlijn
+function getCurrentTimePosition() {
+  const now = new Date();
+  
+  // Voor testen: voeg 2 dagen toe
+  now.setDate(now.getDate() + 2);
+  
+  const currentDay = now.getDay(); // 0 = zondag, 1 = maandag, etc.
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  
+  // Map JavaScript day naar onze dayOrder
+  const dayMap: { [key: number]: string } = {
+    0: "sunday",    // zondag
+    1: "monday",    // maandag
+    2: "tuesday",   // dinsdag
+    3: "wednesday", // woensdag
+    4: "thursday",  // donderdag
+    5: "friday",    // vrijdag
+    6: "saturday"   // zaterdag
+  };
+  
+  const currentDayId = dayMap[currentDay];
+  if (!currentDayId) return null;
+  
+  // Bereken minuten sinds festival start
+  const startDayIdx = getDayIndex(FESTIVAL_START_DAY);
+  const currentDayIdx = getDayIndex(currentDayId);
+  const daysDiff = currentDayIdx - startDayIdx;
+  const festivalStartMin = timeToMinutes(FESTIVAL_START_TIME);
+  const currentTimeMin = currentHour * 60 + currentMinute;
+  
+  // Als we voor het festival start zijn, return null
+  if (daysDiff < 0 || (daysDiff === 0 && currentTimeMin < festivalStartMin)) {
+    return null;
+  }
+  
+  return daysDiff * 24 * 60 + (currentTimeMin - festivalStartMin);
+}
+
 export default function TimetableView() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const dayRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
   const { isFavorite, toggleFavorite } = useFavorites()
   const { data, isLoading, error } = useOfflineData()
+  const [currentTimePosition, setCurrentTimePosition] = useState<number | null>(null)
+
+  // Update current time position every minute
+  useEffect(() => {
+    const updateTime = () => {
+      const newPosition = getCurrentTimePosition();
+      setCurrentTimePosition(newPosition);
+    };
+    
+    updateTime(); // Initial update
+    const interval = setInterval(updateTime, 60000); // Update every minute
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto-scroll to current time when component mounts or current time changes
+  useEffect(() => {
+    if (currentTimePosition !== null && scrollRef.current) {
+      // Add a longer delay to ensure DOM is fully rendered and timeline width is calculated
+      const timeoutId = setTimeout(() => {
+        if (scrollRef.current) {
+          const scrollPosition = currentTimePosition * (HOUR_WIDTH / 60);
+          // Scroll to current time with some offset to center it in viewport
+          const viewportWidth = scrollRef.current.clientWidth;
+          const targetScrollLeft = scrollPosition - (viewportWidth / 2);
+          
+          console.log('Scrolling to current time:', {
+            currentTimePosition,
+            scrollPosition,
+            viewportWidth,
+            targetScrollLeft
+          });
+          
+          scrollRef.current.scrollTo({ 
+            left: Math.max(0, targetScrollLeft), 
+            behavior: "smooth" 
+          });
+        }
+      }, 500); // 500ms delay
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [currentTimePosition]);
+
+  // Additional effect to handle initial scroll after data loads
+  useEffect(() => {
+    if (!isLoading && currentTimePosition !== null && scrollRef.current) {
+      const timeoutId = setTimeout(() => {
+        if (scrollRef.current) {
+          const scrollPosition = currentTimePosition * (HOUR_WIDTH / 60);
+          const viewportWidth = scrollRef.current.clientWidth;
+          const targetScrollLeft = scrollPosition - (viewportWidth / 2);
+          
+          console.log('Initial scroll after data load:', {
+            currentTimePosition,
+            scrollPosition,
+            viewportWidth,
+            targetScrollLeft
+          });
+          
+          scrollRef.current.scrollTo({ 
+            left: Math.max(0, targetScrollLeft), 
+            behavior: "smooth" 
+          });
+        }
+      }, 1000); // 1 second delay for initial load
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isLoading, currentTimePosition]);
 
   // Use offline data if available, fallback to static imports
   const timetable = data?.timetable || []
@@ -286,7 +396,7 @@ export default function TimetableView() {
           <div className="flex-1 overflow-auto timetable-scrollbar" ref={scrollRef} onScroll={handleScroll}>
             {/* Sticky tijdlabels bovenaan */}
             <div className="sticky top-0 z-40 bg-black border-b border-gray-700">
-              <div className="flex" style={{ width: timelineWidth }}>
+              <div className="flex relative" style={{ width: timelineWidth }}>
                 {hourLabels.map((h, i) => (
                   <div
                     key={h}
@@ -313,11 +423,44 @@ export default function TimetableView() {
                     })()}
                   </div>
                 ))}
+                
+                {/* Now indicator - rode verticale lijn */}
+                {currentTimePosition !== null && (
+                  <div
+                    className="absolute top-0 z-50 pointer-events-none"
+                    style={{
+                      left: `${currentTimePosition * (HOUR_WIDTH / 60)}px`,
+                      height: '100vh',
+                    }}
+                  >
+                    {/* Rode lijn */}
+                    <div className="w-0.5 bg-red-500 h-full shadow-lg shadow-red-500/50"></div>
+                    
+                    {/* "Now" label - gecentreerd op de lijn */}
+                    <div className="absolute top-2 transform -translate-x-1/2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">
+                      NOW
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             
             {/* Artiesten per stage */}
-            <div className="flex flex-col" style={{ width: timelineWidth }}>
+            <div className="flex flex-col relative" style={{ width: timelineWidth }}>
+              {/* Now indicator voor artiesten sectie */}
+              {currentTimePosition !== null && (
+                <div
+                  className="absolute top-0 z-50 pointer-events-none"
+                  style={{
+                    left: `${currentTimePosition * (HOUR_WIDTH / 60)}px`,
+                    height: '100%',
+                  }}
+                >
+                  {/* Rode lijn */}
+                  <div className="w-0.5 bg-red-500 h-full shadow-lg shadow-red-500/50"></div>
+                </div>
+              )}
+              
               {stages.map((stage) => (
                 <div key={stage.id} className="relative" style={{ height: "80px", width: timelineWidth, marginBottom: "16px" }}>
                   {/* Sticky stagenaam boven de artiestenrij */}

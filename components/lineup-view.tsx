@@ -8,10 +8,14 @@ import { stages, days } from "@/data/timetable"
 import { useFavorites } from "@/contexts/favorites-context"
 import { useOfflineData } from "@/hooks/use-offline-data"
 
-export default function LineupView() {
+interface LineupViewProps {
+  showFavoritesOnly: boolean
+  setShowFavoritesOnly: (value: boolean) => void
+}
+
+export default function LineupView({ showFavoritesOnly, setShowFavoritesOnly }: LineupViewProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStage, setSelectedStage] = useState<string | null>(null)
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
   const { isFavorite, toggleFavorite } = useFavorites()
   const { data, isLoading, error } = useOfflineData()
 
@@ -33,6 +37,23 @@ export default function LineupView() {
   const getStageName = (stageId: string) => {
     const stage = stages.find((s) => s.id === stageId)
     return stage?.name || stageId
+  }
+
+  // Helper function to format date DD-MM-YYYY
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear()
+    return `${day}-${month}-${year}`
+  }
+
+  // Helper function to get day info
+  const getDayInfo = (artist: any) => {
+    // Use startDay if available, otherwise fall back to day
+    const dayId = artist.startDay || artist.day
+    const day = days.find((d) => d.id === dayId)
+    return day ? { name: day.name, date: formatDate(day.date) } : { name: 'Unknown', date: 'Unknown' }
   }
 
   // Show loading state
@@ -59,23 +80,6 @@ export default function LineupView() {
 
   return (
     <div className="p-4">
-      {/* Alleen Show Favorites */}
-      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-        <Button
-          variant={showFavoritesOnly ? "default" : "outline"}
-          size="sm"
-          className={`ml-2 ${
-            showFavoritesOnly
-              ? "bg-yellow-500 hover:bg-yellow-600 text-black"
-              : "border-gray-600 text-gray-300 hover:bg-gray-800"
-          }`}
-          onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-        >
-          <Star className={`w-4 h-4 mr-2 ${showFavoritesOnly ? "fill-current" : ""}`} />
-          {showFavoritesOnly ? "Show All" : "Show Favorites"}
-        </Button>
-      </div>
-
       {/* Search */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -87,40 +91,63 @@ export default function LineupView() {
         />
       </div>
 
-      {/* Artists List */}
-      <div className="space-y-4">
+      {/* Artists Grid - using timetable-style cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredArtists.map((artist) => {
           const isFav = isFavorite(artist.id)
           const stage = stages.find((s) => s.id === artist.stage)
-          const day = days.find((d) => d.id === artist.day)
+          const dayInfo = getDayInfo(artist)
+          
           return (
-            <div key={artist.id} className="flex items-center gap-4 p-4 bg-gray-900 rounded-lg transition-colors">
-              <div className="w-16 h-16 bg-gray-700 rounded-lg flex-shrink-0 overflow-hidden">
-                <img
-                  src="/placeholder.svg?height=64&width=64"
-                  alt={artist.name}
-                  className="w-full h-full object-cover"
-                />
+            <div 
+              key={artist.id} 
+              className={`relative rounded-lg border transition-colors cursor-pointer group h-32 ${
+                isFav
+                  ? 'bg-yellow-400 border-yellow-500' 
+                  : 'bg-gray-800 border-gray-600 hover:bg-gray-700'
+              }`}
+              onClick={() => toggleFavorite(artist.id)}
+            >
+              {/* Favorite button */}
+              <div className="absolute top-2 right-2 z-10">
+                <span
+                  onClick={e => { e.stopPropagation(); toggleFavorite(artist.id); }}
+                  className="inline-flex items-center justify-center"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill={isFav ? '#FFD700' : 'none'}
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke={isFav ? '#FFD700' : '#d1d5db'}
+                    className={`w-5 h-5 ${isFav ? '' : 'text-gray-400'}`}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.75.75 0 0 1 1.04 0l2.347 2.382a.75.75 0 0 0 .564.22l3.247-.23a.75.75 0 0 1 .78.977l-.98 3.19a.75.75 0 0 0 .217.77l2.522 2.36a.75.75 0 0 1-.44 1.3l-3.25.23a.75.75 0 0 0-.564.22l-2.347 2.382a.75.75 0 0 1-1.04 0l-2.347-2.382a.75.75 0 0 0-.564-.22l-3.25-.23a.75.75 0 0 1-.44-1.3l2.522-2.36a.75.75 0 0 0 .217-.77l-.98-3.19a.75.75 0 0 1 .78-.977l3.247.23a.75.75 0 0 0 .564-.22l2.347-2.382z" />
+                  </svg>
+                </span>
               </div>
 
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg text-white truncate">{artist.name}</h3>
-                <p className="text-gray-400 text-sm">
-                  {artist.startTime} - {artist.endTime} | {stage?.name}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {day?.name} {day?.date}
-                </p>
+              {/* Content */}
+              <div className="p-4 h-full flex flex-col justify-between">
+                {/* Artist name */}
+                <div className={`text-lg font-semibold truncate ${isFav ? 'text-black' : 'text-white'}`}>
+                  {artist.name}
+                </div>
+                
+                {/* Day and date */}
+                <div className={`text-sm ${isFav ? 'text-black/80' : 'text-gray-400'}`}>
+                  {dayInfo.date} • {artist.startTime} - {artist.endTime}
+                </div>
+                
+                {/* Stage name */}
+                <div className={`text-sm font-medium ${isFav ? 'text-black/80' : 'text-gray-300'} flex items-center gap-2`}>
+                  <div 
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: stage?.color || "#ec4899" }}
+                  />
+                  {stage?.name || 'Unknown Stage'}
+                </div>
               </div>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                className="flex-shrink-0 hover:bg-gray-800"
-                onClick={() => toggleFavorite(artist.id)}
-              >
-                <Star className={`w-6 h-6 ${isFav ? "text-yellow-400 fill-current" : "text-gray-400"}`} />
-              </Button>
             </div>
           )
         })}
