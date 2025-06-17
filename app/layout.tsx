@@ -4,6 +4,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { FavoritesProvider } from "@/contexts/favorites-context"
 import { OfflineInitializer } from "@/components/offline-initializer"
+import { GoogleAnalytics } from "@/components/google-analytics"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -46,6 +47,7 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="16x16" href="/icon-192x192.png" />
       </head>
       <body className={inter.className}>
+        <GoogleAnalytics />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
