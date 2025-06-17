@@ -444,7 +444,6 @@ export default function TimetableView() {
                   <div className="w-0.5 bg-red-500 h-full shadow-lg shadow-red-500/50"></div>
                 </div>
               )}
-              
               {stages.map((stage) => (
                 <div key={stage.id} className="relative" style={{ height: "80px", width: timelineWidth, marginBottom: "16px" }}>
                   {/* Sticky stagenaam above the artist row */}
@@ -517,6 +516,8 @@ export default function TimetableView() {
                   </div>
                 </div>
               ))}
+              {/* Add bottom padding for scroll space */}
+              <div style={{ height: "80px" }}></div>
             </div>
           </div>
         </div>
