@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button"
 import { stages, days, type Artist } from "@/data/timetable"
 import { useFavorites } from "@/contexts/favorites-context"
 import { useOfflineData } from "@/hooks/use-offline-data"
-import { TabNav } from "./TabNav"
-import { StickyHeader } from "./StickyHeader"
 
 function parseTime(time: string) {
   // "02:00" => 120
@@ -69,7 +67,7 @@ function getFestivalTotalMinutes(timetable: Artist[]) {
   return Math.ceil(max / 60) * 60;
 }
 
-export default function TimetableView({ onNavigateToLineup }: { onNavigateToLineup?: () => void }) {
+export default function TimetableView() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const dayRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
@@ -235,11 +233,8 @@ export default function TimetableView({ onNavigateToLineup }: { onNavigateToLine
   // Show loading state
   if (isLoading) {
     return (
-      <div className="p-4">
-        <h1 className="text-3xl font-bold mb-6">Timetable</h1>
-        <div className="text-center py-12 text-gray-400">
-          <p>Loading timetable...</p>
-        </div>
+      <div className="text-center py-12 text-gray-400">
+        <p>Loading timetable...</p>
       </div>
     )
   }
@@ -247,11 +242,8 @@ export default function TimetableView({ onNavigateToLineup }: { onNavigateToLine
   // Show error state
   if (error) {
     return (
-      <div className="p-4">
-        <h1 className="text-3xl font-bold mb-6">Timetable</h1>
-        <div className="text-center py-12 text-red-400">
-          <p>Error loading timetable: {error}</p>
-        </div>
+      <div className="text-center py-12 text-red-400">
+        <p>Error loading timetable: {error}</p>
       </div>
     )
   }
@@ -259,39 +251,33 @@ export default function TimetableView({ onNavigateToLineup }: { onNavigateToLine
   // Show fallback if no data
   if (!timetable || timetable.length === 0) {
     return (
-      <div className="p-4">
-        <h1 className="text-3xl font-bold mb-6">Timetable</h1>
-        <div className="text-center py-12 text-gray-400">
-          <p>Geen timetable data beschikbaar.</p>
-        </div>
+      <div className="text-center py-12 text-gray-400">
+        <p>Geen timetable data beschikbaar.</p>
       </div>
     )
   }
 
   return (
-    <div className="h-screen flex flex-col bg-black text-white">
-      <StickyHeader>
-        <TabNav active="timetable" onTab={tab => { if (tab === "lineup") onNavigateToLineup?.(); }} />
-        {/* Dag-tabs - horizontaal scrollbaar */}
-        <div className="overflow-x-auto mb-2 hide-scrollbar">
-          <div className="flex gap-2" style={{ minWidth: 'max-content', paddingBottom: '4px' }}>
-            {dayOrder.map((day, index) => (
-              <Button
-                key={day}
-                variant={activeDay === day ? "default" : "outline"}
-                className={`px-4 py-2 rounded-full font-semibold transition-colors whitespace-nowrap flex-shrink-0 ${
-                  activeDay === day 
-                    ? "bg-pink-500 text-white" 
-                    : "bg-gray-800 text-gray-200 hover:bg-gray-700 border border-gray-600"
-                }`}
-                onClick={() => scrollToDay(day)}
-              >
-                {day.charAt(0).toUpperCase() + day.slice(1)}
-              </Button>
-            ))}
-          </div>
+    <div className="h-full flex flex-col bg-black text-white">
+      {/* Dag-tabs - horizontaal scrollbaar */}
+      <div className="overflow-x-auto mb-2 hide-scrollbar bg-black/90 backdrop-blur-sm border-b border-gray-800">
+        <div className="flex gap-2 px-4 py-3" style={{ minWidth: 'max-content' }}>
+          {dayOrder.map((day, index) => (
+            <Button
+              key={day}
+              variant={activeDay === day ? "default" : "outline"}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors whitespace-nowrap flex-shrink-0 ${
+                activeDay === day 
+                  ? "bg-pink-500 text-white" 
+                  : "bg-gray-800 text-gray-200 hover:bg-gray-700 border border-gray-600"
+              }`}
+              onClick={() => scrollToDay(day)}
+            >
+              {day.charAt(0).toUpperCase() + day.slice(1)}
+            </Button>
+          ))}
         </div>
-      </StickyHeader>
+      </div>
 
       {/* Scrollbare content area */}
       <div className="flex-1 overflow-hidden">
@@ -333,7 +319,7 @@ export default function TimetableView({ onNavigateToLineup }: { onNavigateToLine
             {/* Artiesten per stage */}
             <div className="flex flex-col" style={{ width: timelineWidth }}>
               {stages.map((stage) => (
-                <div key={stage.id} className="relative" style={{ height: "80px", width: timelineWidth }}>
+                <div key={stage.id} className="relative" style={{ height: "80px", width: timelineWidth, marginBottom: "16px" }}>
                   {/* Sticky stagenaam boven de artiestenrij */}
                   <div
                     className="text-xs font-semibold text-white px-2 py-1 rounded z-30 bg-black/90 border-b border-gray-700 sticky left-0"
@@ -352,7 +338,7 @@ export default function TimetableView({ onNavigateToLineup }: { onNavigateToLine
                     {stage.name}
                   </div>
                   {/* Artiesten tijdlijn */}
-                  <div className="relative" style={{ height: "56px", width: timelineWidth, marginTop: "4px" }}>
+                  <div className="relative" style={{ height: "56px", width: timelineWidth, marginTop: "8px" }}>
                     {timetable.filter((a) => a.stage === stage.id).map((artist) => {
                       const left = getMinutesSinceFestivalStart(artist) * (HOUR_WIDTH / 60);
                       const width = getArtistDuration(artist) * (HOUR_WIDTH / 60);
@@ -360,7 +346,11 @@ export default function TimetableView({ onNavigateToLineup }: { onNavigateToLine
                       return (
                         <div
                           key={artist.id}
-                          className="absolute top-0 h-full bg-gray-800 rounded-lg border border-gray-600 hover:bg-gray-700 transition-colors cursor-pointer group"
+                          className={`absolute top-0 h-full rounded-lg border transition-colors cursor-pointer group flex flex-col justify-between ${
+                            isFav
+                              ? 'bg-yellow-400 border-yellow-500' 
+                              : 'bg-gray-800 border-gray-600 hover:bg-gray-700'
+                          }`}
                           style={{
                             left: `${left}px`,
                             width: `${width}px`,
@@ -368,11 +358,29 @@ export default function TimetableView({ onNavigateToLineup }: { onNavigateToLine
                           }}
                           onClick={() => toggleFavorite(artist.id)}
                         >
+                          {/* Ster icoon rechtsboven */}
+                          <div className="absolute top-1 right-1 z-10">
+                            <span
+                              onClick={e => { e.stopPropagation(); toggleFavorite(artist.id); }}
+                              className="inline-flex items-center justify-center"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill={isFav ? '#FFD700' : 'none'}
+                                viewBox="0 0 24 24"
+                                strokeWidth={1.5}
+                                stroke={isFav ? '#FFD700' : '#d1d5db'}
+                                className={`w-5 h-5 ${isFav ? '' : 'text-gray-400'}`}
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.75.75 0 0 1 1.04 0l2.347 2.382a.75.75 0 0 0 .564.22l3.247-.23a.75.75 0 0 1 .78.977l-.98 3.19a.75.75 0 0 0 .217.77l2.522 2.36a.75.75 0 0 1-.44 1.3l-3.25.23a.75.75 0 0 0-.564.22l-2.347 2.382a.75.75 0 0 1-1.04 0l-2.347-2.382a.75.75 0 0 0-.564-.22l-3.25-.23a.75.75 0 0 1-.44-1.3l2.522-2.36a.75.75 0 0 0 .217-.77l-.98-3.19a.75.75 0 0 1 .78-.977l3.247.23a.75.75 0 0 0 .564-.22l2.347-2.382z" />
+                              </svg>
+                            </span>
+                          </div>
                           <div className="p-2 h-full flex flex-col justify-between">
-                            <div className="text-xs font-semibold text-white truncate">
+                            <div className={`text-xs font-semibold truncate ${isFav ? 'text-black' : 'text-white'}`}>
                               {artist.name}
                             </div>
-                            <div className="text-xs text-gray-400">
+                            <div className={`text-xs ${isFav ? 'text-black/80' : 'text-gray-400'}`}>
                               {artist.startTime} - {artist.endTime}
                             </div>
                           </div>

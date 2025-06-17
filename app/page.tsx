@@ -13,43 +13,58 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Festival Timetable PWA - Works Offline! */}
-      <main className={activeView === "timetable" ? "h-screen" : "pb-20"}>
+      {/* Page Header - niet klikbaar */}
+      <header className="sticky top-0 z-50 bg-black/90 backdrop-blur-sm border-b border-gray-800">
+        <div className="px-4 py-4">
+          <h1 className="text-2xl font-bold text-white">
+            {activeView === "timetable" ? "Timetable" : "Lineup"}
+          </h1>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className={activeView === "timetable" ? "h-[calc(100vh-120px)]" : "pb-20"}>
         {activeView === "timetable" ? (
-          <TimetableView onNavigateToLineup={() => setActiveView("lineup")} />
+          <TimetableView />
         ) : (
-          <LineupView onNavigateToTimetable={() => setActiveView("timetable")} />
+          <LineupView />
         )}
       </main>
 
-      {/* Bottom Navigation - alleen zichtbaar voor lineup view */}
-      {activeView === "lineup" && (
-        <div className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-sm border-t border-gray-800">
-          <div className="flex justify-center items-center py-4 px-8">
-            <div className="flex gap-4">
-              <Button
-                variant="default"
-                size="lg"
-                className="rounded-full px-8 py-6 bg-pink-500 hover:bg-pink-600 text-white"
-                onClick={() => setActiveView("lineup")}
-              >
-                <Mic className="w-5 h-5 mr-2" />
-                Lineup
-              </Button>
-              <Button
-                variant="secondary"
-                size="lg"
-                className="rounded-full px-8 py-6 bg-gray-800 hover:bg-gray-700 text-gray-300"
-                onClick={() => setActiveView("timetable")}
-              >
-                <Calendar className="w-5 h-5 mr-2" />
-                Timetable
-              </Button>
-            </div>
+      {/* Bottom Navigation - altijd zichtbaar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-sm border-t border-gray-800">
+        <div className="flex justify-center items-center py-4 px-8">
+          <div className="flex gap-4">
+            <Button
+              variant={activeView === "timetable" ? "default" : "secondary"}
+              size="lg"
+              className={`rounded-full px-8 py-6 ${
+                activeView === "timetable" 
+                  ? "bg-pink-500 hover:bg-pink-600 text-white" 
+                  : "bg-gray-800 hover:bg-gray-700 text-gray-300"
+              }`}
+              onClick={() => setActiveView("timetable")}
+            >
+              <Calendar className="w-5 h-5 mr-2" />
+              Timetable
+            </Button>
+            <Button
+              variant={activeView === "lineup" ? "default" : "secondary"}
+              size="lg"
+              className={`rounded-full px-8 py-6 ${
+                activeView === "lineup" 
+                  ? "bg-pink-500 hover:bg-pink-600 text-white" 
+                  : "bg-gray-800 hover:bg-gray-700 text-gray-300"
+              }`}
+              onClick={() => setActiveView("lineup")}
+            >
+              <Mic className="w-5 h-5 mr-2" />
+              Lineup
+            </Button>
           </div>
-          <div className="w-12 h-1 bg-white rounded-full mx-auto mb-2" />
         </div>
-      )}
+        <div className="w-12 h-1 bg-white rounded-full mx-auto mb-2" />
+      </div>
 
       {/* Offline Status */}
       <OfflineStatus />

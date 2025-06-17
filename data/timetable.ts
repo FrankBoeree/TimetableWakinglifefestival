@@ -9,6 +9,12 @@ export interface Artist {
   endDay?: string
 }
 
+// Helper: tijd naar minuten
+function timeToMinutes(time: string) {
+  const [h, m] = time.split(":").map(Number);
+  return h * 60 + m;
+}
+
 export interface Stage {
   id: string
   name: string
@@ -51,10 +57,26 @@ function timeAdd(start: string, mins: number) {
 function mapLegacyDays(artists: Artist[]): Artist[] {
   return artists.map((artist) => {
     if (!artist.startDay && artist.day) {
+      // Bepaal of de artiest door het 0000u punt gaat
+      const startMin = timeToMinutes(artist.startTime);
+      const endMin = timeToMinutes(artist.endTime);
+      const goesOverMidnight = endMin < startMin;
+      
+      // Bepaal de endDay
+      let endDay = artist.day;
+      if (goesOverMidnight) {
+        // Als de artiest door het 0000u punt gaat, eindigt hij op de volgende dag
+        const dayOrder = ["wednesday", "thursday", "friday", "saturday", "sunday", "monday"];
+        const currentDayIndex = dayOrder.indexOf(artist.day);
+        if (currentDayIndex !== -1 && currentDayIndex < dayOrder.length - 1) {
+          endDay = dayOrder[currentDayIndex + 1];
+        }
+      }
+      
       return {
         ...artist,
         startDay: artist.day,
-        endDay: artist.day,
+        endDay: endDay,
       };
     }
     return artist;
@@ -1274,7 +1296,7 @@ export const timetable: Artist[] = mapLegacyDays([
     "startTime":"01:00",
     "endTime":"02:00",
     "stage":"Cochilo",
-    "day":"sunday"
+    "day":"monday"
   },
   {
     "id":"161",
