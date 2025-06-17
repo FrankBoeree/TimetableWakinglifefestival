@@ -11,6 +11,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* Festival Timetable PWA - Auto Deploy Test */}
       <main className="pb-20">{activeView === "timetable" ? <TimetableView /> : <LineupView />}</main>
 
       {/* Bottom Navigation */}
