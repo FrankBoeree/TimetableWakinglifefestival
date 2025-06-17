@@ -7,7 +7,7 @@ type TabNavProps = {
 
 export function TabNav({ active, onTab }: TabNavProps) {
   return (
-    <div className="flex items-center gap-10 mb-4">
+    <div className="flex items-center gap-10 mb-4 relative z-50">
       <button
         onClick={() => onTab("lineup")}
         className={`text-2xl font-bold transition-colors cursor-pointer ${
