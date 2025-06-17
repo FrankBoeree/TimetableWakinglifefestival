@@ -5,13 +5,15 @@ import { Mic, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import TimetableView from "@/components/timetable-view"
 import LineupView from "@/components/lineup-view"
+import { OfflineStatus } from "@/components/offline-status"
+import { InstallPrompt } from "@/components/install-prompt"
 
 export default function Home() {
   const [activeView, setActiveView] = useState<"timetable" | "lineup">("timetable")
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Festival Timetable PWA - Auto Deploy Test */}
+      {/* Festival Timetable PWA - Works Offline! */}
       <main className="pb-20">{activeView === "timetable" ? <TimetableView /> : <LineupView />}</main>
 
       {/* Bottom Navigation */}
@@ -48,6 +50,12 @@ export default function Home() {
         </div>
         <div className="w-12 h-1 bg-white rounded-full mx-auto mb-2" />
       </div>
+
+      {/* Offline Status */}
+      <OfflineStatus />
+      
+      {/* Install Prompt */}
+      <InstallPrompt />
     </div>
   )
 }
