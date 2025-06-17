@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button"
 import { stages, days } from "@/data/timetable"
 import { useFavorites } from "@/contexts/favorites-context"
 import { useOfflineData } from "@/hooks/use-offline-data"
+import { TabNav } from "./TabNav"
+import { StickyHeader } from "./StickyHeader"
 
-export default function LineupView() {
-  const [activeDay, setActiveDay] = useState<string | null>(null)
+export default function LineupView({ onNavigateToTimetable }: { onNavigateToTimetable?: () => void }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStage, setSelectedStage] = useState<string | null>(null)
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
@@ -20,7 +21,6 @@ export default function LineupView() {
   const timetable = data?.timetable || []
 
   const filteredArtists = timetable
-    .filter((artist) => !activeDay || artist.day === activeDay)
     .filter((artist) =>
       artist.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -41,7 +41,17 @@ export default function LineupView() {
   if (isLoading) {
     return (
       <div className="p-4">
-        <h1 className="text-3xl font-bold mb-6">Lineup</h1>
+        <div className="flex items-center gap-6 mb-6">
+          <h1 className="text-3xl font-bold text-white">
+            Lineup
+          </h1>
+          <button
+            onClick={onNavigateToTimetable}
+            className="text-3xl font-bold text-gray-400 hover:text-white transition-colors cursor-pointer"
+          >
+            Timetable
+          </button>
+        </div>
         <div className="text-center py-12 text-gray-400">
           <p>Loading lineup...</p>
         </div>
@@ -53,7 +63,17 @@ export default function LineupView() {
   if (error) {
     return (
       <div className="p-4">
-        <h1 className="text-3xl font-bold mb-6">Lineup</h1>
+        <div className="flex items-center gap-6 mb-6">
+          <h1 className="text-3xl font-bold text-white">
+            Lineup
+          </h1>
+          <button
+            onClick={onNavigateToTimetable}
+            className="text-3xl font-bold text-gray-400 hover:text-white transition-colors cursor-pointer"
+          >
+            Timetable
+          </button>
+        </div>
         <div className="text-center py-12 text-red-400">
           <p>Error loading lineup: {error}</p>
         </div>
@@ -63,29 +83,12 @@ export default function LineupView() {
 
   return (
     <div className="p-4">
-      <h1 className="text-3xl font-bold mb-6">Lineup</h1>
+      <StickyHeader>
+        <TabNav active="lineup" onTab={tab => { if (tab === "timetable") onNavigateToTimetable?.(); }} />
+      </StickyHeader>
 
-      {/* Day Tabs + Favorites */}
+      {/* Alleen Show Favorites */}
       <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-        <div className="flex gap-2 min-w-max">
-          <Button
-            variant={activeDay === null ? "default" : "outline"}
-            className={`px-4 py-2 rounded-full font-semibold transition-colors whitespace-nowrap ${activeDay === null ? "bg-pink-500 text-white" : "bg-gray-800 text-gray-200 hover:bg-gray-700 border border-gray-600"}`}
-            onClick={() => setActiveDay(null)}
-          >
-            All
-          </Button>
-          {days.map((day) => (
-            <Button
-              key={day.id}
-              variant={activeDay === day.id ? "default" : "outline"}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors whitespace-nowrap ${activeDay === day.id ? "bg-pink-500 text-white" : "bg-gray-800 text-gray-200 hover:bg-gray-700 border border-gray-600"}`}
-              onClick={() => setActiveDay(day.id)}
-            >
-              {day.name}
-            </Button>
-          ))}
-        </div>
         <Button
           variant={showFavoritesOnly ? "default" : "outline"}
           size="sm"
