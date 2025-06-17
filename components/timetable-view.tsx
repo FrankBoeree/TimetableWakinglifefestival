@@ -69,10 +69,9 @@ function getFestivalTotalMinutes(timetable: Artist[]) {
 
 // Helper: bereken huidige tijd positie in de tijdlijn
 function getCurrentTimePosition() {
-  const now = new Date();
-  
-  // Voor testen: voeg 2 dagen toe
-  // now.setDate(now.getDate() + 2);
+  // For testing: add 2 days
+  const testOffset = 2 * 24 * 60 * 60 * 1000
+  const now = new Date(Date.now() + testOffset)
   
   const currentDay = now.getDay(); // 0 = zondag, 1 = maandag, etc.
   const currentHour = now.getHours();
@@ -199,31 +198,31 @@ export default function TimetableView() {
   // Dag-tab functionaliteit
   const [activeDay, setActiveDay] = useState(dayOrder[0])
 
-  // Bepaal per dag het start-minuut in de tijdlijn
+  // Determine start minute per day in the timeline
   const dayStartMinutes: Record<string, number> = {};
   dayOrder.forEach((day, idx) => {
     if (day === "wednesday") {
-      // Woensdag start op 21:00 (0 minuten - startpunt van festival)
+      // Wednesday starts at 21:00 (0 minutes - festival start point)
       dayStartMinutes[day] = 0;
     } else if (day === "thursday") {
-      // Donderdag start op 00:00 (3 uur na woensdag 21:00 = 180 minuten)
+      // Thursday starts at 00:00 (3 hours after Wednesday 21:00 = 180 minutes)
       dayStartMinutes[day] = 180;
     } else if (day === "friday") {
-      // Vrijdag start op 00:00 (27 uur na woensdag 21:00 = 1620 minuten)
+      // Friday starts at 00:00 (27 hours after Wednesday 21:00 = 1620 minutes)
       dayStartMinutes[day] = 1620;
     } else if (day === "saturday") {
-      // Zaterdag start op 00:00 (51 uur na woensdag 21:00 = 3060 minuten)
+      // Saturday starts at 00:00 (51 hours after Wednesday 21:00 = 3060 minutes)
       dayStartMinutes[day] = 3060;
     } else if (day === "sunday") {
-      // Zondag start op 00:00 (75 uur na woensdag 21:00 = 4500 minuten)
+      // Sunday starts at 00:00 (75 hours after Wednesday 21:00 = 4500 minutes)
       dayStartMinutes[day] = 4500;
     } else if (day === "monday") {
-      // Maandag start op 00:00 (99 uur na woensdag 21:00 = 5940 minuten)
+      // Monday starts at 00:00 (99 hours after Wednesday 21:00 = 5940 minutes)
       dayStartMinutes[day] = 5940;
     }
   });
 
-  // Scroll naar dag-tab
+  // Scroll to day tab
   function scrollToDay(day: string) {
     if (!scrollRef.current) return;
     
@@ -232,23 +231,23 @@ export default function TimetableView() {
     scrollRef.current.scrollTo({ left: px, behavior: "smooth" });
   }
 
-  // Detecteer actieve dag bij scrollen - wissel zodra dagstart zichtbaar is
+  // Detect active day when scrolling - switch as soon as day start is visible
   function handleScroll() {
     if (!scrollRef.current) return;
     const scrollLeft = scrollRef.current.scrollLeft;
     
-    // Bereken de scroll positie in minuten sinds festival start
+    // Calculate scroll position in minutes since festival start
     const scrollMinutes = scrollLeft / (HOUR_WIDTH / 60);
     
-    // Bepaal welke dag actief is gebaseerd op scroll positie
+    // Determine which day is active based on scroll position
     let foundDay = dayOrder[0];
     
-    // Loop door alle dagen om te vinden welke dag actief is
+    // Loop through all days to find which day is active
     for (let i = 0; i < dayOrder.length; i++) {
       const day = dayOrder[i];
       const dayStartMin = dayStartMinutes[day];
       
-      // Als we voorbij het startpunt van deze dag zijn, update de actieve dag
+      // If we're past the start point of this day, update the active day
       if (scrollMinutes >= dayStartMin) {
         foundDay = day;
       }
@@ -259,14 +258,14 @@ export default function TimetableView() {
     }
   }
 
-  // Alle artiesten, eventueel gefilterd op favorieten
+  // All artists, optionally filtered by favorites
   const filteredTimetable = timetable.filter(
     (artist) => !showFavoritesOnly || isFavorite(artist.id)
   )
 
   const DAY_WIDTH = 24 * HOUR_WIDTH;
 
-  // Helper: splits artiesten over dagen
+  // Helper: split artists across days
   function getDayArtistBlocks(artists: Artist[], dayId: string) {
     const blocks: { artist: Artist, start: number, end: number }[] = [];
     for (const artist of artists) {
@@ -274,13 +273,13 @@ export default function TimetableView() {
       const end = parseTime(artist.endTime);
       if (start === null || end === null) continue;
       if (artist.startDay === dayId && artist.endDay === dayId) {
-        // Normale set binnen één dag
+        // Normal set within one day
         blocks.push({ artist, start, end });
       } else if (artist.startDay === dayId) {
-        // Start op deze dag, loopt door na middernacht
+        // Starts on this day, continues after midnight
         blocks.push({ artist, start, end: 24 * 60 });
       } else if (artist.endDay === dayId) {
-        // Eindigt op deze dag, begon vorige dag
+        // Ends on this day, started previous day
         blocks.push({ artist, start: 0, end });
       }
     }
@@ -295,7 +294,7 @@ export default function TimetableView() {
     return slots;
   }
 
-  // Dynamisch tijdsbereik bepalen voor de actieve dag, rekening houdend met over-middernacht
+  // Dynamically determine time range for the active day, considering over-midnight
   function getDayTimeRange(dayId: string) {
     const artists = timetable.filter((a) => a.startDay === dayId || a.endDay === dayId)
     let min = 24 * 60, max = 0
@@ -303,7 +302,7 @@ export default function TimetableView() {
       const start = parseTime(a.startTime)
       let end = parseTime(a.endTime)
       if (start !== null && end !== null && end < start) {
-        end += 24 * 60 // over middernacht
+        end += 24 * 60 // over midnight
       }
       if (start !== null && start < min) min = start
       if (end !== null && end > max) max = end
@@ -314,20 +313,20 @@ export default function TimetableView() {
     return { min, max }
   }
 
-  // Bereken de positie en breedte van een artiest binnen de dag-tijdlijn (t.o.v. earliest time), rekening houdend met over-middernacht
+  // Calculate the position and width of an artist within the day timeline (relative to earliest time), considering over-midnight
   function getArtistPositionInDay(artist: Artist, minTime: number) {
     const start = parseTime(artist.startTime)
     let end = parseTime(artist.endTime)
     if (start === null || end === null) return { left: 0, width: 0 }
     if (end < start) {
-      end += 24 * 60 // over middernacht
+      end += 24 * 60 // over midnight
     }
-    const left = (start - minTime) * 4 // 4px per minuut = 240px per uur
+    const left = (start - minTime) * 4 // 4px per minute = 240px per hour
     const width = (end - start) * 4
     return { left, width }
   }
 
-  // Styling voor tabs
+  // Styling for tabs
   const tabClass = (active: boolean) =>
     `px-4 py-2 rounded-full font-semibold transition-colors whitespace-nowrap ${
       active
@@ -362,14 +361,14 @@ export default function TimetableView() {
   if (!timetable || timetable.length === 0) {
     return (
       <div className="text-center py-12 text-gray-400">
-        <p>Geen timetable data beschikbaar.</p>
+        <p>No timetable data available.</p>
       </div>
     )
   }
 
   return (
     <div className="h-full flex flex-col bg-black text-white">
-      {/* Dag-tabs - horizontaal scrollbaar */}
+      {/* Day tabs - horizontally scrollable */}
       <div className="overflow-x-auto mb-2 hide-scrollbar bg-black/90 backdrop-blur-sm border-b border-gray-800">
         <div className="flex gap-2 px-4 py-3" style={{ minWidth: 'max-content' }}>
           {dayOrder.map((day, index) => (
@@ -389,12 +388,12 @@ export default function TimetableView() {
         </div>
       </div>
 
-      {/* Scrollbare content area */}
+      {/* Scrollable content area */}
       <div className="flex-1 overflow-hidden">
         <div className="flex h-full">
-          {/* Scrollbare tijdlijn */}
+          {/* Scrollable timeline */}
           <div className="flex-1 overflow-auto timetable-scrollbar" ref={scrollRef} onScroll={handleScroll}>
-            {/* Sticky tijdlabels bovenaan */}
+            {/* Sticky time labels above */}
             <div className="sticky top-0 z-40 bg-black border-b border-gray-700">
               <div className="flex relative" style={{ width: timelineWidth }}>
                 {hourLabels.map((h, i) => (
@@ -424,7 +423,7 @@ export default function TimetableView() {
                   </div>
                 ))}
                 
-                {/* Now indicator - rode verticale lijn */}
+                {/* Now indicator - red vertical line */}
                 {currentTimePosition !== null && (
                   <div
                     className="absolute top-0 z-50 pointer-events-none"
@@ -433,10 +432,10 @@ export default function TimetableView() {
                       height: '100vh',
                     }}
                   >
-                    {/* Rode lijn */}
+                    {/* Red line */}
                     <div className="w-0.5 bg-red-500 h-full shadow-lg shadow-red-500/50"></div>
                     
-                    {/* "Now" label - gecentreerd op de lijn */}
+                    {/* "Now" label - centered on the line */}
                     <div className="absolute top-2 transform -translate-x-1/2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">
                       NOW
                     </div>
@@ -445,9 +444,9 @@ export default function TimetableView() {
               </div>
             </div>
             
-            {/* Artiesten per stage */}
+            {/* Artists per stage */}
             <div className="flex flex-col relative" style={{ width: timelineWidth }}>
-              {/* Now indicator voor artiesten sectie */}
+              {/* Now indicator for artists section */}
               {currentTimePosition !== null && (
                 <div
                   className="absolute top-0 z-50 pointer-events-none"
@@ -456,14 +455,14 @@ export default function TimetableView() {
                     height: '100%',
                   }}
                 >
-                  {/* Rode lijn */}
+                  {/* Red line */}
                   <div className="w-0.5 bg-red-500 h-full shadow-lg shadow-red-500/50"></div>
                 </div>
               )}
               
               {stages.map((stage) => (
                 <div key={stage.id} className="relative" style={{ height: "80px", width: timelineWidth, marginBottom: "16px" }}>
-                  {/* Sticky stagenaam boven de artiestenrij */}
+                  {/* Sticky stagenaam above the artist row */}
                   <div
                     className="text-xs font-semibold text-white px-2 py-1 rounded z-30 bg-black/90 border-b border-gray-700 sticky left-0"
                     style={{ 
@@ -480,7 +479,7 @@ export default function TimetableView() {
                   >
                     {stage.name}
                   </div>
-                  {/* Artiesten tijdlijn */}
+                  {/* Artist timeline */}
                   <div className="relative" style={{ height: "56px", width: timelineWidth, marginTop: "8px" }}>
                     {timetable.filter((a) => a.stage === stage.id).map((artist) => {
                       const left = getMinutesSinceFestivalStart(artist) * (HOUR_WIDTH / 60);
@@ -501,7 +500,7 @@ export default function TimetableView() {
                           }}
                           onClick={() => toggleFavorite(artist.id)}
                         >
-                          {/* Ster icoon rechtsboven */}
+                          {/* Ster icon right above */}
                           <div className="absolute top-1 right-1 z-10">
                             <span
                               onClick={e => { e.stopPropagation(); toggleFavorite(artist.id); }}

@@ -57,15 +57,14 @@ function timeAdd(start: string, mins: number) {
 function mapLegacyDays(artists: Artist[]): Artist[] {
   return artists.map((artist) => {
     if (!artist.startDay && artist.day) {
-      // Bepaal of de artiest door het 0000u punt gaat
-      const startMin = timeToMinutes(artist.startTime);
-      const endMin = timeToMinutes(artist.endTime);
-      const goesOverMidnight = endMin < startMin;
-      
-      // Bepaal de endDay
+      // Determine if the artist goes through the 0000h point
+      const startHour = parseInt(artist.startTime.split(':')[0]);
+      const endHour = parseInt(artist.endTime.split(':')[0]);
+
+      // If the artist goes through the 0000h point, they end on the next day
       let endDay = artist.day;
-      if (goesOverMidnight) {
-        // Als de artiest door het 0000u punt gaat, eindigt hij op de volgende dag
+      if (endHour < startHour) {
+        // Determine the endDay
         const dayOrder = ["wednesday", "thursday", "friday", "saturday", "sunday", "monday"];
         const currentDayIndex = dayOrder.indexOf(artist.day);
         if (currentDayIndex !== -1 && currentDayIndex < dayOrder.length - 1) {

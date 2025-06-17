@@ -11,7 +11,7 @@ body {
     text-wrap: balance;
   }
   
-  /* Verberg scrollbar voor horizontale scroll */
+  /* Hide scrollbar for horizontal scroll */
   .hide-scrollbar {
     -ms-overflow-style: none;  /* Internet Explorer 10+ */
     scrollbar-width: none;  /* Firefox */
@@ -21,15 +21,15 @@ body {
     display: none;  /* Safari and Chrome */
   }
 
-  /* Custom scrollbar styling voor timetable */
+  /* Custom scrollbar styling for timetable */
   .timetable-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
   }
   
   .timetable-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
   
   .timetable-scrollbar::-webkit-scrollbar-track {

@@ -89,7 +89,7 @@ export function InstallPrompt() {
             </Button>
           </div>
           <CardDescription className="text-purple-200">
-            Installeer voor de beste offline ervaring
+            Install for the best offline experience
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">

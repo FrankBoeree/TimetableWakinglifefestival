@@ -12,23 +12,18 @@ export default function OfflinePage() {
           <div className="mx-auto mb-4 p-3 bg-red-500/20 rounded-full w-fit">
             <WifiOff className="h-8 w-8 text-red-400" />
           </div>
-          <CardTitle className="text-white text-2xl">Je bent offline</CardTitle>
+          <CardTitle className="text-white text-2xl">No internet connection found</CardTitle>
           <CardDescription className="text-gray-300">
-            Geen internetverbinding gevonden
+            Don't worry! This app works completely offline. You can still:
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-gray-300 text-center">
-            Maak je geen zorgen! Je kunt nog steeds je favoriete artiesten bekijken en je tijdschema raadplegen.
-          </p>
-          
-          <div className="space-y-2">
-            <h4 className="font-semibold text-white">Wat je nog kunt doen:</h4>
-            <ul className="text-sm text-gray-300 space-y-1">
-              <li>• Bekijk je opgeslagen favorieten</li>
-              <li>• Raadpleeg het festival tijdschema</li>
-              <li>• Bekijk artiest informatie</li>
-              <li>• Wijzig je favorieten (wordt opgeslagen)</li>
+          <div className="bg-black/20 rounded-lg p-6 backdrop-blur-sm">
+            <ul className="text-left space-y-2 text-gray-300">
+              <li>• View your saved favorites</li>
+              <li>• Check the festival timetable</li>
+              <li>• Browse the complete lineup</li>
+              <li>• Modify your favorites (will be saved)</li>
             </ul>
           </div>
 
@@ -37,7 +32,7 @@ export default function OfflinePage() {
             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
-            Probeer opnieuw
+            Try Again
           </Button>
         </CardContent>
       </Card>

@@ -1,72 +1,72 @@
 # Festival Timetable PWA - Offline First
 
-Een Progressive Web App (PWA) voor het Waking Life Festival 2025 die volledig offline werkt. Alle data wordt lokaal opgeslagen en de app blijft functioneren zonder internetverbinding.
+A Progressive Web App (PWA) for the Waking Life Festival 2025 that works completely offline. All data is stored locally and the app continues to function without an internet connection.
 
 ## 🚀 Features
 
-### Offline Functionaliteit
-- **Volledig offline werkend**: Alle data wordt lokaal opgeslagen
-- **Service Worker**: Cached alle assets en data voor offline gebruik
-- **IndexedDB**: Snelle lokale opslag voor grote datasets
-- **Automatische synchronisatie**: Data wordt opgeslagen zodra je online bent
-- **Offline status indicator**: Zie wanneer je offline bent
+### Offline Functionality
+- **Fully offline working**: All data is stored locally
+- **Service Worker**: Caches all assets and data for offline use
+- **IndexedDB**: Fast local storage for large datasets
+- **Automatic synchronization**: Data is saved as soon as you're online
+- **Offline status indicator**: See when you're offline
 
 ### PWA Features
-- **Installeerbaar**: Voeg toe aan startscherm
-- **App-like ervaring**: Volledig scherm zonder browser UI
-- **Push notifications**: (Toekomstige feature)
-- **Background sync**: (Toekomstige feature)
+- **Installable**: Add to home screen
+- **App-like experience**: Full screen without browser UI
+- **Push notifications**: (Future feature)
+- **Background sync**: (Future feature)
 
 ### Festival Features
-- **Timetable view**: Bekijk alle optredens per dag en stage
-- **Lineup view**: Overzicht van alle artiesten
-- **Favorieten**: Markeer je favoriete artiesten
-- **Artiest details**: Meer informatie over artiesten
-- **Offline favorieten**: Wijzigingen worden lokaal opgeslagen
+- **Timetable view**: View all performances by day and stage
+- **Lineup view**: Overview of all artists
+- **Favorites**: Mark your favorite artists
+- **Artist details**: More information about artists
+- **Offline favorites**: Changes are saved locally
 
-## 📱 Installatie
+## 📱 Installation
 
-### Voor Gebruikers
-1. Open de app in je browser
-2. Klik op "Installeer App" wanneer de prompt verschijnt
-3. Of gebruik het menu van je browser om de app te installeren
-4. De app is nu beschikbaar op je startscherm
+### For Users
+1. Open the app in your browser
+2. Click "Install App" when the prompt appears
+3. Or use your browser's menu to install the app
+4. The app is now available on your home screen
 
-### Voor Ontwikkelaars
+### For Developers
 ```bash
-# Clone de repository
+# Clone the repository
 git clone [repository-url]
 cd festival-timetable-pwa
 
-# Installeer dependencies
+# Install dependencies
 pnpm install
 
 # Start development server
 pnpm dev
 
-# Build voor productie
+# Build for production
 pnpm build
 ```
 
-## 🛠 Technische Details
+## 🛠 Technical Details
 
 ### Offline Storage
-- **IndexedDB**: Voor grote datasets (timetable, artiest details)
-- **localStorage**: Voor kleine data (favorieten)
-- **Service Worker Cache**: Voor assets en API responses
+- **IndexedDB**: For large datasets (timetable, artist details)
+- **localStorage**: For small data (favorites)
+- **Service Worker Cache**: For assets and API responses
 
 ### Data Flow
-1. **Eerste keer laden**: Data wordt geïmporteerd en opgeslagen in IndexedDB
-2. **Offline gebruik**: Data wordt geladen uit IndexedDB
-3. **Online synchronisatie**: Nieuwe data wordt gedownload en opgeslagen
-4. **Favorieten**: Worden direct opgeslagen in localStorage en IndexedDB
+1. **First load**: Data is imported and stored in IndexedDB
+2. **Offline use**: Data is loaded from IndexedDB
+3. **Online synchronization**: New data is downloaded and stored
+4. **Favorites**: Are saved directly in localStorage and IndexedDB
 
 ### Service Worker
-- **Cache Strategy**: Cache-first voor statische assets
-- **Network Fallback**: Probeer netwerk, val terug op cache
-- **Background Sync**: Voor toekomstige offline acties
+- **Cache Strategy**: Cache-first for static assets
+- **Network Fallback**: Try network, fall back to cache
+- **Background Sync**: For future offline actions
 
-## 📊 Data Structuur
+## 📊 Data Structure
 
 ### Timetable Data
 ```typescript
@@ -103,30 +103,30 @@ interface OfflineData {
 }
 ```
 
-## 🔧 Configuratie
+## 🔧 Configuration
 
 ### Service Worker
-De service worker wordt automatisch geregistreerd en cached:
-- Statische assets (HTML, CSS, JS, afbeeldingen)
+The service worker is automatically registered and cached:
+- Static assets (HTML, CSS, JS, images)
 - API responses
-- Offline fallback pagina
+- Offline fallback page
 
 ### PWA Manifest
-- App naam en beschrijving
-- Icons voor verschillende formaten
+- App name and description
+- Icons for different sizes
 - Theme colors
 - Display mode (standalone)
-- Shortcuts voor snelle toegang
+- Shortcuts for quick access
 
-## 📱 Browser Ondersteuning
+## 📱 Browser Support
 
-### Vereist
+### Required
 - Service Workers
 - IndexedDB
 - localStorage
 - Fetch API
 
-### Ondersteunde Browsers
+### Supported Browsers
 - Chrome 40+
 - Firefox 44+
 - Safari 11.1+
@@ -134,41 +134,41 @@ De service worker wordt automatisch geregistreerd en cached:
 
 ## 🚨 Troubleshooting
 
-### App werkt niet offline
-1. Controleer of Service Worker is geregistreerd
+### App doesn't work offline
+1. Check if Service Worker is registered
 2. Open DevTools > Application > Service Workers
-3. Controleer of IndexedDB data aanwezig is
+3. Check if IndexedDB data is present
 
-### Favorieten verdwijnen
-1. Controleer localStorage in DevTools
-2. Controleer IndexedDB in DevTools > Application > Storage
-3. Data wordt opgeslagen in beide locaties
+### Favorites disappear
+1. Check localStorage in DevTools
+2. Check IndexedDB in DevTools > Application > Storage
+3. Data is stored in both locations
 
-### Installatie werkt niet
-1. Controleer of HTTPS wordt gebruikt (vereist voor PWA)
-2. Controleer of manifest.json correct is
-3. Controleer browser ondersteuning
+### Installation doesn't work
+1. Check if HTTPS is used (required for PWA)
+2. Check if manifest.json is correct
+3. Check browser support
 
-## 🔮 Toekomstige Features
+## 🔮 Future Features
 
-- [ ] Push notifications voor favoriete artiesten
-- [ ] Background sync voor offline wijzigingen
-- [ ] Offline maps en navigatie
-- [ ] Social features (delen van favorieten)
-- [ ] Offline foto's en media
-- [ ] Real-time updates wanneer online
+- [ ] Push notifications for favorite artists
+- [ ] Background sync for offline changes
+- [ ] Offline maps and navigation
+- [ ] Social features (sharing favorites)
+- [ ] Offline photos and media
+- [ ] Real-time updates when online
 
-## 📄 Licentie
+## 📄 License
 
-MIT License - zie LICENSE bestand voor details.
+MIT License - see LICENSE file for details.
 
-## 🤝 Bijdragen
+## 🤝 Contributing
 
-Pull requests zijn welkom! Voor grote wijzigingen, open eerst een issue om te bespreken wat je wilt veranderen.
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
 
 ## 📞 Support
 
-Voor vragen of problemen:
-1. Check de troubleshooting sectie
-2. Open een issue op GitHub
-3. Neem contact op via [email] 
+For questions or problems:
+1. Check the troubleshooting section
+2. Open an issue on GitHub
+3. Contact via [email] 

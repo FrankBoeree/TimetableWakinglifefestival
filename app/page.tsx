@@ -63,7 +63,7 @@ export default function Home() {
       {mounted && countdown.show && (
         <div className="bg-gradient-to-r from-pink-500 to-pink-600 text-white text-center py-3 px-4">
           <div className="flex items-center justify-center gap-4 text-sm font-medium">
-            <span>🎵 Waking Life 2025 start over:</span>
+            <span>🎵 Waking Life 2025 starts in:</span>
             <div className="flex gap-2">
               {countdown.days > 0 && (
                 <span className="bg-pink-700 px-2 py-1 rounded">
@@ -84,7 +84,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Page Header - niet klikbaar */}
+      {/* Page Header - not clickable */}
       <header className="sticky top-0 z-50 bg-black/90 backdrop-blur-sm border-b border-gray-800">
         <div className="px-4 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-white">
@@ -134,7 +134,7 @@ export default function Home() {
         )}
       </main>
 
-      {/* Bottom Navigation - altijd zichtbaar */}
+      {/* Bottom Navigation - always visible */}
       <div className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-sm border-t border-gray-800">
         <div className="flex justify-center items-center py-4 px-4">
           <div className="flex gap-2">

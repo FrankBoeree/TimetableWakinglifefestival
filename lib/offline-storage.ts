@@ -4,7 +4,7 @@ export interface OfflineData {
   favorites: string[]
   lastSync: number
   version: string
-  // artistDetails: any[] // legacy, niet meer gebruikt
+  // artistDetails: any[] // legacy, no longer used
 }
 
 class OfflineStorage {
