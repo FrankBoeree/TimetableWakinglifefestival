@@ -23,21 +23,31 @@ export function useOfflineData(): UseOfflineDataReturn {
       setError(null)
 
       // Try to load from IndexedDB first
-      let offlineData = await offlineStorage.getAllData()
+      let offlineData: OfflineData | null = null
+      
+      try {
+        offlineData = await offlineStorage.getAllData()
+      } catch (dbError) {
+        console.warn('IndexedDB not available, using static data:', dbError)
+      }
 
-      // If no data in IndexedDB, load from static imports and save
-      if (!offlineData.timetable.length || !offlineData.artistDetails.length) {
+      // If no data in IndexedDB or IndexedDB failed, use static imports
+      if (!offlineData || !offlineData.timetable.length || !offlineData.artistDetails.length) {
         offlineData = {
           timetable,
           artistDetails,
-          favorites: offlineData.favorites,
+          favorites: offlineData?.favorites || [],
           lastSync: Date.now(),
           version: '1.0.0'
         }
 
-        // Save to IndexedDB
-        await offlineStorage.saveData('timetable', timetable)
-        await offlineStorage.saveData('artistDetails', artistDetails)
+        // Try to save to IndexedDB (but don't fail if it doesn't work)
+        try {
+          await offlineStorage.saveData('timetable', timetable)
+          await offlineStorage.saveData('artistDetails', artistDetails)
+        } catch (saveError) {
+          console.warn('Failed to save to IndexedDB:', saveError)
+        }
       }
 
       setData(offlineData)
@@ -45,7 +55,7 @@ export function useOfflineData(): UseOfflineDataReturn {
       console.error('Error loading offline data:', err)
       setError('Failed to load data')
       
-      // Fallback to static data
+      // Always provide fallback data
       setData({
         timetable,
         artistDetails,

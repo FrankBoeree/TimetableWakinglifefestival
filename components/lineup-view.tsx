@@ -4,8 +4,9 @@ import { useState } from "react"
 import { Search, Star } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { timetable, stages, days } from "@/data/timetable"
+import { stages, days } from "@/data/timetable"
 import { useFavorites } from "@/contexts/favorites-context"
+import { useOfflineData } from "@/hooks/use-offline-data"
 
 export default function LineupView() {
   const [activeDay, setActiveDay] = useState<string | null>(null)
@@ -13,6 +14,10 @@ export default function LineupView() {
   const [selectedStage, setSelectedStage] = useState<string | null>(null)
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
   const { isFavorite, toggleFavorite } = useFavorites()
+  const { data, isLoading, error } = useOfflineData()
+
+  // Use offline data if available, fallback to static imports
+  const timetable = data?.timetable || []
 
   const filteredArtists = timetable
     .filter((artist) => !activeDay || artist.day === activeDay)
@@ -30,6 +35,30 @@ export default function LineupView() {
   const getStageName = (stageId: string) => {
     const stage = stages.find((s) => s.id === stageId)
     return stage?.name || stageId
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="p-4">
+        <h1 className="text-3xl font-bold mb-6">Lineup</h1>
+        <div className="text-center py-12 text-gray-400">
+          <p>Loading lineup...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="p-4">
+        <h1 className="text-3xl font-bold mb-6">Lineup</h1>
+        <div className="text-center py-12 text-red-400">
+          <p>Error loading lineup: {error}</p>
+        </div>
+      </div>
+    )
   }
 
   return (

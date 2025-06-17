@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect } from "react"
 import { Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { timetable, stages, days, type Artist } from "@/data/timetable"
+import { stages, days, type Artist } from "@/data/timetable"
 import { useFavorites } from "@/contexts/favorites-context"
+import { useOfflineData } from "@/hooks/use-offline-data"
 
 export default function TimetableView() {
   const [activeDay, setActiveDay] = useState(days[0].id)
@@ -12,6 +13,10 @@ export default function TimetableView() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const dayRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
   const { isFavorite, toggleFavorite } = useFavorites()
+  const { data, isLoading, error } = useOfflineData()
+
+  // Use offline data if available, fallback to static imports
+  const timetable = data?.timetable || []
 
   // Alle artiesten, eventueel gefilterd op favorieten
   const filteredTimetable = timetable.filter(
@@ -124,6 +129,30 @@ export default function TimetableView() {
     return stage?.color || "#ec4899"
   }
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="p-4">
+        <h1 className="text-3xl font-bold mb-6">Timetable</h1>
+        <div className="text-center py-12 text-gray-400">
+          <p>Loading timetable...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="p-4">
+        <h1 className="text-3xl font-bold mb-6">Timetable</h1>
+        <div className="text-center py-12 text-red-400">
+          <p>Error loading timetable: {error}</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-4">
       <h1 className="text-3xl font-bold mb-6">Timetable</h1>
@@ -198,57 +227,48 @@ export default function TimetableView() {
                           {/* Stage naam */}
                           <div className="sticky left-0 z-10 w-32 flex-shrink-0">
                             <div
-                              className="px-3 py-1 rounded-full text-white text-xs font-medium uppercase tracking-wide inline-block"
+                              className="text-sm font-semibold text-white p-2 rounded"
                               style={{ backgroundColor: stage.color }}
                             >
                               {stage.name}
                             </div>
                           </div>
-                          {/* Timeline track */}
-                          <div className="relative">
-                            <div
-                              className="relative h-20 bg-gray-900 rounded-lg"
-                              style={{ width: `${dayWidth}px` }}
-                            >
-                              {/* Gridlijnen */}
-                              {hourSlots.map((_, index) => (
+                          {/* Artiesten voor deze stage */}
+                          <div className="relative" style={{ height: "60px" }}>
+                            {stageArtists.map((artist) => {
+                              const position = getArtistPosition(artist)
+                              const isFav = isFavorite(artist.id)
+                              return (
                                 <div
-                                  key={index}
-                                  className="absolute top-0 bottom-0 w-px bg-gray-700"
-                                  style={{ left: `${index * 200}px` }}
-                                />
-                              ))}
-                              {/* Artiesten */}
-                              {stageArtists.map((artist) => {
-                                const { left, width } = getArtistPositionInDay(artist)
-                                const isFav = isFavorite(artist.id)
-                                return (
-                                  <div
-                                    key={artist.id}
-                                    className="absolute top-2 bottom-2 rounded-lg p-3 transition-all hover:scale-105 cursor-pointer"
-                                    style={{
-                                      left: `${left}px`,
-                                      width: `${width}px`,
-                                      backgroundColor: isFav ? getStageColor(artist.stage) : "#374151",
-                                      minWidth: "120px",
-                                    }}
-                                    onClick={() => toggleFavorite(artist.id)}
-                                  >
-                                    <div className="flex items-center justify-between h-full">
-                                      <div className="flex-1 min-w-0">
-                                        <h3 className="font-semibold text-sm truncate text-white">{artist.name}</h3>
-                                        <p className="text-xs text-gray-200 mt-1">
-                                          {artist.startTime} - {artist.endTime}
-                                        </p>
-                                      </div>
+                                  key={artist.id}
+                                  className="absolute top-0 h-full bg-gray-800 rounded-lg border border-gray-600 hover:bg-gray-700 transition-colors cursor-pointer group"
+                                  style={{
+                                    left: `${position.left}px`,
+                                    width: `${position.width}px`,
+                                    minWidth: "60px",
+                                  }}
+                                  onClick={() => toggleFavorite(artist.id)}
+                                >
+                                  <div className="p-2 h-full flex flex-col justify-between">
+                                    <div className="text-xs font-semibold text-white truncate">
+                                      {artist.name}
+                                    </div>
+                                    <div className="text-xs text-gray-400">
+                                      {artist.startTime} - {artist.endTime}
+                                    </div>
+                                    <div className="absolute top-1 right-1">
                                       <Star
-                                        className={`w-5 h-5 ml-2 flex-shrink-0 ${isFav ? "text-yellow-400 fill-current" : "text-gray-400"}`}
+                                        className={`w-3 h-3 ${
+                                          isFav
+                                            ? "text-yellow-400 fill-current"
+                                            : "text-gray-400 group-hover:text-yellow-300"
+                                        }`}
                                       />
                                     </div>
                                   </div>
-                                )
-                              })}
-                            </div>
+                                </div>
+                              )
+                            })}
                           </div>
                         </div>
                       )
