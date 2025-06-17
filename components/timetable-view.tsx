@@ -69,9 +69,7 @@ function getFestivalTotalMinutes(timetable: Artist[]) {
 
 // Helper: bereken huidige tijd positie in de tijdlijn
 function getCurrentTimePosition() {
-  // For testing: add 2 days
-  const testOffset = 2 * 24 * 60 * 60 * 1000
-  const now = new Date(Date.now() + testOffset)
+  const now = new Date()
   
   const currentDay = now.getDay(); // 0 = zondag, 1 = maandag, etc.
   const currentHour = now.getHours();
@@ -368,82 +366,69 @@ export default function TimetableView() {
 
   return (
     <div className="h-full flex flex-col bg-black text-white">
-      {/* Day tabs - horizontally scrollable */}
-      <div className="overflow-x-auto mb-2 hide-scrollbar bg-black/90 backdrop-blur-sm border-b border-gray-800">
-        <div className="flex gap-2 px-4 py-3" style={{ minWidth: 'max-content' }}>
-          {dayOrder.map((day, index) => (
-            <Button
-              key={day}
-              variant={activeDay === day ? "default" : "outline"}
-              className={`px-4 py-2 rounded-full font-semibold transition-colors whitespace-nowrap flex-shrink-0 ${
-                activeDay === day 
-                  ? "bg-pink-500 text-white" 
-                  : "bg-gray-800 text-gray-200 hover:bg-gray-700 border border-gray-600"
-              }`}
-              onClick={() => scrollToDay(day)}
-            >
-              {day.charAt(0).toUpperCase() + day.slice(1)}
-            </Button>
-          ))}
+      {/* Day tabs - horizontally scrollable (sticky) */}
+      <div className="sticky top-0 z-40 bg-black border-b border-gray-700">
+        <div className="overflow-x-auto hide-scrollbar bg-black/90 backdrop-blur-sm border-b border-gray-800">
+          <div className="flex gap-2 px-4 py-3" style={{ minWidth: 'max-content' }}>
+            {dayOrder.map((day, index) => (
+              <Button
+                key={day}
+                variant={activeDay === day ? "default" : "outline"}
+                className={`px-4 py-2 rounded-full font-semibold transition-colors whitespace-nowrap flex-shrink-0 ${
+                  activeDay === day 
+                    ? "bg-pink-500 text-white" 
+                    : "bg-gray-800 text-gray-200 hover:bg-gray-700 border border-gray-600"
+                }`}
+                onClick={() => scrollToDay(day)}
+              >
+                {day.charAt(0).toUpperCase() + day.slice(1)}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
-
       {/* Scrollable content area */}
       <div className="flex-1 overflow-hidden">
         <div className="flex h-full">
-          {/* Scrollable timeline */}
+          {/* Scrollable timeline (inclusief tijdlabels) */}
           <div className="flex-1 overflow-auto timetable-scrollbar" ref={scrollRef} onScroll={handleScroll}>
-            {/* Sticky time labels above */}
-            <div className="sticky top-0 z-40 bg-black border-b border-gray-700">
-              <div className="flex relative" style={{ width: timelineWidth }}>
-                {hourLabels.map((h, i) => (
-                  <div
-                    key={h}
-                    className="text-left text-gray-400 text-sm flex-shrink-0 py-2"
-                    style={{ width: `${HOUR_WIDTH}px` }}
-                  >
-                    {(() => {
-                      // Toon de tijd sinds festival start (woensdag 21:00)
-                      // h = 0: 21:00 (festival start)
-                      // h = 1: 22:00
-                      // h = 3: 00:00 (donderdag)
-                      // h = 4: 01:00 (donderdag)
-                      
-                      let displayHour;
-                      if (h < 3) {
-                        // Woensdag: 21:00 tot 23:00
-                        displayHour = 21 + h;
-                      } else {
-                        // Andere dagen: 00:00 tot 23:00
-                        displayHour = (h - 3) % 24;
-                      }
-                      
-                      return `${displayHour.toString().padStart(2, "0")}:00`;
-                    })()}
+            {/* Time labels - nu onderdeel van de scrollbare timeline */}
+            <div className="flex relative px-4" style={{ width: timelineWidth }}>
+              {hourLabels.map((h, i) => (
+                <div
+                  key={h}
+                  className="text-left text-gray-400 text-sm flex-shrink-0 py-2"
+                  style={{ width: `${HOUR_WIDTH}px` }}
+                >
+                  {(() => {
+                    let displayHour;
+                    if (h < 3) {
+                      displayHour = 21 + h;
+                    } else {
+                      displayHour = (h - 3) % 24;
+                    }
+                    return `${displayHour.toString().padStart(2, "0")}:00`;
+                  })()}
+                </div>
+              ))}
+              {/* Now indicator - red vertical line */}
+              {currentTimePosition !== null && (
+                <div
+                  className="absolute top-0 z-50 pointer-events-none"
+                  style={{
+                    left: `${currentTimePosition * (HOUR_WIDTH / 60)}px`,
+                    height: '100%',
+                  }}
+                >
+                  {/* Red line */}
+                  <div className="w-0.5 bg-red-500 h-full shadow-lg shadow-red-500/50"></div>
+                  {/* "Now" label - centered on the line */}
+                  <div className="absolute top-2 transform -translate-x-1/2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">
+                    NOW
                   </div>
-                ))}
-                
-                {/* Now indicator - red vertical line */}
-                {currentTimePosition !== null && (
-                  <div
-                    className="absolute top-0 z-50 pointer-events-none"
-                    style={{
-                      left: `${currentTimePosition * (HOUR_WIDTH / 60)}px`,
-                      height: '100vh',
-                    }}
-                  >
-                    {/* Red line */}
-                    <div className="w-0.5 bg-red-500 h-full shadow-lg shadow-red-500/50"></div>
-                    
-                    {/* "Now" label - centered on the line */}
-                    <div className="absolute top-2 transform -translate-x-1/2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">
-                      NOW
-                    </div>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
-            
             {/* Artists per stage */}
             <div className="flex flex-col relative" style={{ width: timelineWidth }}>
               {/* Now indicator for artists section */}

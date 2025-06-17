@@ -63,7 +63,7 @@ export default function Home() {
       {mounted && countdown.show && (
         <div className="bg-gradient-to-r from-pink-500 to-pink-600 text-white text-center py-3 px-4">
           <div className="flex items-center justify-center gap-4 text-sm font-medium">
-            <span>🎵 Waking Life 2025 starts in:</span>
+            <span>🎵 Waking Life starts in:</span>
             <div className="flex gap-2">
               {countdown.days > 0 && (
                 <span className="bg-pink-700 px-2 py-1 rounded">
@@ -126,7 +126,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className={activeView === "timetable" ? "h-[calc(100vh-120px)]" : "pb-24"}>
+      <main className={activeView === "timetable" ? "h-[calc(100vh-120px)] pb-16 overflow-y-auto" : "pb-24"}>
         {activeView === "timetable" ? (
           <TimetableView />
         ) : (

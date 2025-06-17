@@ -37,7 +37,6 @@ export const days: Day[] = [
 ]
 
 export const stages: Stage[] = [
-  { id: "Apuro", name: "Apuro", color: "#ec4899" },
   { id: "Floresta", name: "Floresta", color: "#8b5cf6" },
   { id: "Praia", name: "Praia", color: "#06b6d4" },
   { id: "Outro Lado", name: "Outro Lado", color: "#10b981" },
