@@ -19,9 +19,9 @@ function formatTime(minutes: number) {
   return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`
 }
 
-// Festival startmoment: woensdag 17:00
+// Festival startmoment: woensdag 21:00
 const FESTIVAL_START_DAY = "wednesday";
-const FESTIVAL_START_TIME = "17:00";
+const FESTIVAL_START_TIME = "21:00";
 const HOUR_WIDTH = 240;
 
 // Helper: dag naar index
@@ -92,34 +92,61 @@ export default function TimetableView() {
   // Bepaal per dag het start-minuut in de tijdlijn
   const dayStartMinutes: Record<string, number> = {};
   dayOrder.forEach((day, idx) => {
-    dayStartMinutes[day] = (idx === 0)
-      ? timeToMinutes(FESTIVAL_START_TIME)
-      : (idx * 24 * 60 + timeToMinutes(FESTIVAL_START_TIME));
+    if (day === "wednesday") {
+      // Woensdag start op 21:00 (0 minuten - startpunt van festival)
+      dayStartMinutes[day] = 0;
+    } else if (day === "thursday") {
+      // Donderdag start op 00:00 (3 uur na woensdag 21:00 = 180 minuten)
+      dayStartMinutes[day] = 180;
+    } else if (day === "friday") {
+      // Vrijdag start op 00:00 (27 uur na woensdag 21:00 = 1620 minuten)
+      dayStartMinutes[day] = 1620;
+    } else if (day === "saturday") {
+      // Zaterdag start op 00:00 (51 uur na woensdag 21:00 = 3060 minuten)
+      dayStartMinutes[day] = 3060;
+    } else if (day === "sunday") {
+      // Zondag start op 00:00 (75 uur na woensdag 21:00 = 4500 minuten)
+      dayStartMinutes[day] = 4500;
+    } else if (day === "monday") {
+      // Maandag start op 00:00 (99 uur na woensdag 21:00 = 5940 minuten)
+      dayStartMinutes[day] = 5940;
+    }
   });
 
   // Scroll naar dag-tab
   function scrollToDay(day: string) {
     if (!scrollRef.current) return;
-    const min = dayStartMinutes[day] - timeToMinutes(FESTIVAL_START_TIME);
-    const px = min * (HOUR_WIDTH / 60);
+    
+    const targetMinutes = dayStartMinutes[day] || 0;
+    const px = targetMinutes * (HOUR_WIDTH / 60);
     scrollRef.current.scrollTo({ left: px, behavior: "smooth" });
   }
 
-  // Detecteer actieve dag bij scrollen
+  // Detecteer actieve dag bij scrollen - wissel zodra dagstart zichtbaar is
   function handleScroll() {
     if (!scrollRef.current) return;
     const scrollLeft = scrollRef.current.scrollLeft;
+    
+    // Bereken de scroll positie in minuten sinds festival start
+    const scrollMinutes = scrollLeft / (HOUR_WIDTH / 60);
+    
+    // Bepaal welke dag actief is gebaseerd op scroll positie
     let foundDay = dayOrder[0];
+    
+    // Loop door alle dagen om te vinden welke dag actief is
     for (let i = 0; i < dayOrder.length; i++) {
-      const min = (i === 0)
-        ? 0
-        : (i * 24 * 60);
-      const px = min * (HOUR_WIDTH / 60);
-      if (scrollLeft >= px) {
-        foundDay = dayOrder[i];
+      const day = dayOrder[i];
+      const dayStartMin = dayStartMinutes[day];
+      
+      // Als we voorbij het startpunt van deze dag zijn, update de actieve dag
+      if (scrollMinutes >= dayStartMin) {
+        foundDay = day;
       }
     }
-    setActiveDay(foundDay);
+    
+    if (foundDay !== activeDay) {
+      setActiveDay(foundDay);
+    }
   }
 
   // Alle artiesten, eventueel gefilterd op favorieten
@@ -242,32 +269,24 @@ export default function TimetableView() {
   return (
     <div className="p-4">
       <h1 className="text-3xl font-bold mb-6">Timetable</h1>
-      {/* Dag-tabs */}
-      <div className="flex gap-2 mb-2" style={{zIndex: 9999, position: 'relative'}}>
-        {dayOrder.map((day, index) => (
-          <button
-            key={day}
-            style={{
-              background: activeDay === day ? '#ec4899' : '#4b5563',
-              color: 'white',
-              padding: '12px 20px',
-              borderRadius: '25px',
-              fontWeight: 'bold',
-              fontSize: '16px',
-              border: activeDay === day ? '2px solid #f9a8d4' : '2px solid #6b7280',
-              transition: 'all 0.2s',
-              transform: activeDay === day ? 'scale(1.05)' : 'scale(1)',
-              boxShadow: activeDay === day ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none',
-              zIndex: 9999,
-              position: 'relative',
-              cursor: 'pointer'
-            }}
-            onClick={() => scrollToDay(day)}
-            type="button"
-          >
-            {day.charAt(0).toUpperCase() + day.slice(1)}
-          </button>
-        ))}
+      {/* Dag-tabs - nu horizontaal scrollbaar */}
+      <div className="overflow-x-auto mb-2 hide-scrollbar">
+        <div className="flex gap-2" style={{ minWidth: 'max-content', paddingBottom: '4px' }}>
+          {dayOrder.map((day, index) => (
+            <Button
+              key={day}
+              variant={activeDay === day ? "default" : "outline"}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors whitespace-nowrap flex-shrink-0 ${
+                activeDay === day 
+                  ? "bg-pink-500 text-white" 
+                  : "bg-gray-800 text-gray-200 hover:bg-gray-700 border border-gray-600"
+              }`}
+              onClick={() => scrollToDay(day)}
+            >
+              {day.charAt(0).toUpperCase() + day.slice(1)}
+            </Button>
+          ))}
+        </div>
       </div>
       <div className="flex">
         {/* Verwijderde linker sticky stagenamen kolom */}
@@ -283,9 +302,22 @@ export default function TimetableView() {
                 style={{ width: `${HOUR_WIDTH}px` }}
               >
                 {(() => {
-                  const totalMin = h * 60 + timeToMinutes(FESTIVAL_START_TIME);
-                  const hour = (totalMin % (24 * 60)) / 60;
-                  return `${hour.toString().padStart(2, "0")}:00`;
+                  // Toon de tijd sinds festival start (woensdag 21:00)
+                  // h = 0: 21:00 (festival start)
+                  // h = 1: 22:00
+                  // h = 3: 00:00 (donderdag)
+                  // h = 4: 01:00 (donderdag)
+                  
+                  let displayHour;
+                  if (h < 3) {
+                    // Woensdag: 21:00 tot 23:00
+                    displayHour = 21 + h;
+                  } else {
+                    // Andere dagen: 00:00 tot 23:00
+                    displayHour = (h - 3) % 24;
+                  }
+                  
+                  return `${displayHour.toString().padStart(2, "0")}:00`;
                 })()}
               </div>
             ))}
