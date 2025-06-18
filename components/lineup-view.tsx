@@ -136,7 +136,7 @@ export default function LineupView({ showFavoritesOnly, setShowFavoritesOnly }: 
                 
                 {/* Day and date */}
                 <div className={`text-sm ${isFav ? 'text-black/80' : 'text-gray-400'}`}>
-                  {dayInfo.date} • {artist.startTime} - {artist.endTime}
+                  {dayInfo.name} • {artist.startTime} - {artist.endTime}
                 </div>
                 
                 {/* Stage name */}

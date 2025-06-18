@@ -9,7 +9,7 @@ import { GoogleAnalytics } from "@/components/google-analytics"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Waking Life 2025 Timetable",
+  title: "Waking Life 2025 - Timetable",
   description: "Festival timetable and lineup for Waking Life 2025",
   manifest: "/manifest.json",
   appleWebApp: {
@@ -45,6 +45,17 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/icon-192x192.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/icon-192x192.png" />
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-L6WZZY6VE5"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-L6WZZY6VE5');
+            `
+          }}
+        />
       </head>
       <body className={inter.className}>
         <GoogleAnalytics />

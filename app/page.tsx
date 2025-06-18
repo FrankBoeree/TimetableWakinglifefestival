@@ -26,9 +26,9 @@ export default function Home() {
     await refreshData()
   }
 
-  // Countdown to Wednesday 17:00
+  // Countdown to Wednesday 21:00
   useEffect(() => {
-    const targetDate = new Date('2025-06-18T17:00:00')
+    const targetDate = new Date('2025-06-18T21:00:00')
     
     const updateCountdown = () => {
       const now = new Date()
