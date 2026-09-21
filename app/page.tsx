@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import TimetableView from "@/components/timetable-view"
 import LineupView from "@/components/lineup-view"
 import { InstallPrompt } from "@/components/install-prompt"
+import { PostFestivalOverlay } from "@/components/post-festival-overlay"
 import { useFavorites } from "@/contexts/favorites-context"
 import { useOfflineData } from "@/hooks/use-offline-data"
 
@@ -170,6 +171,7 @@ export default function Home() {
       
       {/* Install Prompt */}
       <InstallPrompt />
+      <PostFestivalOverlay />
     </div>
   )
 }
