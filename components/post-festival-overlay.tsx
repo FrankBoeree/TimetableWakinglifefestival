@@ -30,7 +30,7 @@ export function PostFestivalOverlay() {
         <div className="space-y-5 pt-2 text-sm font-medium leading-6 text-gray-200">
           <p>
             Thanks for using this timetable. Discover future festival timetables and new editions on
-            One More Set.
+            onemoreset.app.
           </p>
           <p>
             Looking for a timetable for another festival? You can submit a request on the site.
